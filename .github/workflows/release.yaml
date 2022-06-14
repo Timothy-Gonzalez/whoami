@@ -79,6 +79,7 @@ jobs:
         run: |
           mkdir -p binaries
           wget ${{ env.YAML2JSON_DOWNLOAD }} -O binaries/yaml2json
+          chmod +x binaries/yaml2json
       - name: Build ${{ matrix.output }}
         run: |
           mkdir -p output
