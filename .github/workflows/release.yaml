@@ -13,9 +13,6 @@ jobs:
         shell: bash
         run: |
           echo "TAG_NAME=$(date +\"%H-%M-%S_%d-%m-%Y\")-${{ github.sha }}" >> $GITHUB_ENV
-      - name: Generate Tag Ref
-        run: |
-          echo "TAG_REF=refs/tags/${{ env.TAG_NAME }}" >> $GITHUB_ENV
       - name: Create Tag
         run: |
           git tag "${{ env.TAG_NAME }}"
@@ -35,7 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.TAG_REF }}
+          tag_name: ${{ env.TAG_NAME }}
           release_name: ${{ env.TAG_NAME }}
           draft: true
           prerelease: false
