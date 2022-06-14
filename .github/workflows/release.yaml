@@ -44,16 +44,29 @@ jobs:
     needs: ["create-release"]
     name: Build
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        output:
+          - yaml
+          - json
     steps:
       - uses: actions/checkout@v3
       - name: Set Download Links
         run: |
           echo "FSYAML_DOWNLOAD=https://github.com/Timothy-Gonzalez/fsyaml/releases/download/v1.0.4/fsyaml-v1.0.4-64-bit-linux-x86_64-unknown-linux-gnu.zip" >> $GITHUB_ENV
+          echo "YAML2JSON_DOWNLOAD=https://github.com/bronze1man/yaml2json/releases/download/v1.3/yaml2json_linux_amd64" >> $GITHUB_ENV
       - name: Check Cache for fsyaml
         id: fsyaml-cache
         uses: actions/cache@v3
         with:
           path: binaries/fsyaml
+          key: ${{ env.FSYAML_DOWNLOAD }}
+      - name: Check Cache for yaml2json
+        id: yaml2json-cache
+        uses: actions/cache@v3
+        with:
+          path: binaries/yaml2json
           key: ${{ env.FSYAML_DOWNLOAD }}
       - name: Install fsyaml
         if: steps.fsyaml-cache.outputs.cache-hit != 'true'
@@ -61,24 +74,35 @@ jobs:
           mkdir -p binaries
           wget ${{ env.FSYAML_DOWNLOAD }} -O fsyaml.zip
           unzip fsyaml.zip -d binaries
-      - name: Build
+      - name: Install yaml2json
+        if: steps.yaml2json-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p binaries
+          wget ${{ env.YAML2JSON_DOWNLOAD }} -O yaml2json.zip
+          unzip yaml2json.zip -d binaries
+      - name: Build ${{ matrix.output }}
         run: |
           mkdir -p output
-          binaries/fsyaml src output/whoami.yaml
+
+          if [ "${{ matrix.output }}" = "yaml" ]; then
+            binaries/fsyaml src > output/whoami.yaml
+          else
+            binaries/fsyaml src > yaml2json > output/whoami.json
+          fi
       - name: Upload to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: output/whoami.yaml
-          asset_name: whoami.yaml
+          asset_path: output/whoami.${{ matrix.output }}
+          asset_name: whoami.${{ matrix.output }}
           asset_content_type: application/octet-stream
       - name: Upload Archive as Artifact
         uses: actions/upload-artifact@v3
         with:
-          path: output/whoami.yaml
-          name: whoami.yaml
+          path: output/whoami.${{ matrix.output }}
+          name: whoami.${{ matrix.output }}
 
   publish:
     needs: ["create-release", "build"]
