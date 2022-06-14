@@ -80,7 +80,7 @@ jobs:
           mkdir -p binaries
           wget ${{ env.YAML2JSON_DOWNLOAD }} -O yaml2json.tar.gz
           ls
-          tar -xfv yaml2json.tar.gz
+          tar xvvf yaml2json.tar.gz
           ls
       - name: Build ${{ matrix.output }}
         run: |
