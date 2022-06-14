@@ -46,6 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set Download Links
+        run: |
           echo "FSYAML_DOWNLOAD=https://github.com/Timothy-Gonzalez/fsyaml/releases/download/v1.0.4/fsyaml-v1.0.4-64-bit-linux-x86_64-unknown-linux-gnu.zip" >> $GITHUB_ENV
       - name: Check Cache for fsyaml
         id: fsyaml-cache
@@ -72,7 +73,6 @@ jobs:
           asset_path: output/whoami.yaml
           asset_name: whoami.yaml
           asset_content_type: application/octet-stream
-
       - name: Upload Archive as Artifact
         uses: actions/upload-artifact@v3
         with:
