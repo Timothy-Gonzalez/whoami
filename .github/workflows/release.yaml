@@ -78,8 +78,7 @@ jobs:
         if: steps.yaml2json-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p binaries
-          wget ${{ env.YAML2JSON_DOWNLOAD }} -O yaml2json.zip
-          unzip yaml2json.zip -d binaries
+          wget ${{ env.YAML2JSON_DOWNLOAD }} -O binaries/yaml2json
       - name: Build ${{ matrix.output }}
         run: |
           mkdir -p output
