@@ -81,7 +81,7 @@ jobs:
           name: whoami.yaml
 
   publish:
-    needs: ["build"]
+    needs: ["create-release", "build"]
     name: Publish Release
     runs-on: ubuntu-latest
     steps:
