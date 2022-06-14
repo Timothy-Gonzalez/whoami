@@ -6,16 +6,19 @@ on:
 jobs:
   create-tag:
     name: Create Tag
+    outputs:
+      tag_name: steps.generate-tag-name.outputs.tag_name
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Generate Tag Name
+        id: generate-tag-name
         shell: bash
         run: |
-          echo "TAG_NAME=$(date +%H-%M-%S_%d-%m-%Y)-${{ github.sha }}" >> $GITHUB_ENV
+          echo "::set-output tag_name=$(date +%H-%M-%S_%d-%m-%Y)-${{ github.sha }}"
       - name: Create Tag
         run: |
-          git tag "${{ env.TAG_NAME }}"
+          git tag "${{ steps.generate_tag_name.outputs.tag_name }}"
           git push --tags
 
   create-release:
@@ -32,8 +35,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: ${{ env.TAG_NAME }}
+          tag_name: ${{ needs.create-tag.outputs.tag_name }}
+          release_name: ${{ needs.create-tag.outputs.tag_name }}
           draft: true
           prerelease: false
 
