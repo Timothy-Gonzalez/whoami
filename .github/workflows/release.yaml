@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  push:
+
+jobs:
+  create-tag:
+    name: Create Tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Generate Tag Name
+        run: |
+          echo "TAG_NAME=${date +'%H:%M:%S-%d:%m:%Y'}-${{ github.sha }}" >> $GITHUB_ENV
+      - name: Generate Tag Ref
+        run: |
+          echo "TAG_REF=refs/tags/${{ env.TAG_NAME }}"
+      - name: Create Tag
+        run: |
+          git tag "${{ env.TAG_NAME }}"
+          git push --tags
+
+  create-release:
+    needs: ["create-tag"]
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create-release.outputs.upload_url }}
+      id: ${{ steps.create-release.outputs.id }}
+    steps:
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+          prerelease: false
+
+  build:
+    needs: ["create-release"]
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Download Links
+          echo "FSYAML_DOWNLOAD=https://github.com/Timothy-Gonzalez/fsyaml/releases/download/v1.0.4/fsyaml-v1.0.4-64-bit-linux-x86_64-unknown-linux-gnu.zip" >> $GITHUB_ENV
+      - name: Check Cache for fsyaml
+        id: fsyaml-cache
+        uses: actions/cache@v3
+        with:
+          path: binaries/fsyaml
+          key: ${{ env.FSYAML_DOWNLOAD }}
+      - name: Install fsyaml
+        if: steps.fsyaml-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p binaries
+          wget ${{ env.FSYAML_DOWNLOAD }} -O fsyaml.zip
+          unzip fsyaml.zip -d binaries
+      - name: Build
+          mkdir -p output
+          binaries/fsyaml src output/whoami.yaml
+      - name: Upload to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: output/whoami.yaml
+          asset_name: whoami.yaml
+          asset_content_type: application/octet-stream
+
+      - name: Upload Archive as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: output/whoami.yaml
+          name: whoami.yaml
+
+  publish:
+    needs: ["build"]
+    name: Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish Release
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ needs.create-release.id }},
+              draft: false
+            });
