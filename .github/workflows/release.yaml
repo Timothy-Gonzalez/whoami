@@ -55,7 +55,7 @@ jobs:
       - name: Set Download Links
         run: |
           echo "FSYAML_DOWNLOAD=https://github.com/Timothy-Gonzalez/fsyaml/releases/download/v1.0.4/fsyaml-v1.0.4-64-bit-linux-x86_64-unknown-linux-gnu.zip" >> $GITHUB_ENV
-          echo "YAML2JSON_DOWNLOAD=https://github.com/Nessex/yaml2json-rs/releases/download/v0.3.2/yaml2json-rs-v0.3.2-aarch64-unknown-linux-gnu.tar.gz" >> $GITHUB_ENV
+          echo "YAML2JSON_DOWNLOAD=https://github.com/Nessex/yaml2json-rs/releases/download/v0.3.2/yaml2json-rs-v0.3.2-x86_64-unknown-linux-musl.tar.gz" >> $GITHUB_ENV
       - name: Check Cache for fsyaml
         id: fsyaml-cache
         uses: actions/cache@v3
@@ -67,7 +67,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: binaries/yaml2json
-          key: ${{ env.FSYAML_DOWNLOAD }}-1
+          key: ${{ env.FSYAML_DOWNLOAD }}
       - name: Install fsyaml
         if: steps.fsyaml-cache.outputs.cache-hit != 'true'
         run: |
@@ -79,8 +79,7 @@ jobs:
         run: |
           mkdir -p binaries
           wget ${{ env.YAML2JSON_DOWNLOAD }} -O yaml2json.tar.gz
-          tar -xf yaml2json.tar.gz yaml2json -C binaries
-          chmod +rwx binaries/yaml2json
+          tar -xfv yaml2json.tar.gz yaml2json -C binaries
       - name: Build ${{ matrix.output }}
         run: |
           mkdir -p output
