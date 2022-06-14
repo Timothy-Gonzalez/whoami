@@ -67,7 +67,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: binaries/yaml2json
-          key: ${{ env.FSYAML_DOWNLOAD }}
+          key: ${{ env.YAML2JSON_DOWNLOAD }}
       - name: Install fsyaml
         if: steps.fsyaml-cache.outputs.cache-hit != 'true'
         run: |
