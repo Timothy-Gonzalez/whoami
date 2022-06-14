@@ -18,7 +18,7 @@ jobs:
           echo "::set-output tag_name=$(date +%H-%M-%S_%d-%m-%Y)-${{ github.sha }}"
       - name: Create Tag
         run: |
-          git tag "${{ steps.generate_tag_name.outputs.tag_name }}"
+          git tag "${{ steps.generate-tag-name.outputs.tag_name }}"
           git push --tags
 
   create-release:
