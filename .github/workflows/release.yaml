@@ -10,6 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Generate Tag Name
+        shell: bash
         run: |
           echo "TAG_NAME=${date +\"%H:%M:%S-%d:%m:%Y\"}-${{ github.sha }}" >> $GITHUB_ENV
       - name: Generate Tag Ref
