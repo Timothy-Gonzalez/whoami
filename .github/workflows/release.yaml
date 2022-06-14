@@ -15,7 +15,7 @@ jobs:
         id: generate-tag-name
         shell: bash
         run: |
-          echo "::set-output tag_name=$(date +%H-%M-%S_%d-%m-%Y)-${{ github.sha }}"
+          echo "::set-output name=tag_name::$(date +%H-%M-%S_%d-%m-%Y)-${{ github.sha }}"
       - name: Create Tag
         run: |
           git tag "${{ steps.generate-tag-name.outputs.tag_name }}"
