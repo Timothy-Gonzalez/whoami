@@ -12,6 +12,7 @@ jobs:
       - name: Generate Tag Name
         shell: bash
         run: |
+          date +\"%H:%M:%S-%d:%m:%Y\"
           echo "TAG_NAME=${date +\"%H:%M:%S-%d:%m:%Y\"}-${{ github.sha }}" >> $GITHUB_ENV
       - name: Generate Tag Ref
         run: |
