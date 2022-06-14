@@ -60,6 +60,7 @@ jobs:
           wget ${{ env.FSYAML_DOWNLOAD }} -O fsyaml.zip
           unzip fsyaml.zip -d binaries
       - name: Build
+        run: |
           mkdir -p output
           binaries/fsyaml src output/whoami.yaml
       - name: Upload to Release
